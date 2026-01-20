@@ -3,7 +3,9 @@
    =========================================== */
 
 /* CSS Reset */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -43,15 +45,28 @@ body {
 }
 
 /* Typography */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: -0.02em;
 }
 
-h1 { font-size: 2.5rem; }
-h2 { font-size: 2rem; }
-h3 { font-size: 1.5rem; }
+h1 {
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
 
 /* Brutalist Components */
 .brutal-box {
@@ -318,8 +333,15 @@ h3 { font-size: 1.5rem; }
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .inbox__empty {
@@ -522,7 +544,9 @@ h3 { font-size: 1.5rem; }
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Toast Notifications */
@@ -560,10 +584,113 @@ h3 { font-size: 1.5rem; }
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
   }
+}
+
+/* Icon Box Component */
+.icon-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: var(--border-width) solid var(--color-black);
+  flex-shrink: 0;
+}
+
+.icon-box--large {
+  width: 64px;
+  height: 64px;
+}
+
+.icon-box--pink {
+  background: var(--color-pink);
+  color: var(--color-black);
+}
+
+.icon-box--cyan {
+  background: #00D4FF;
+  color: var(--color-black);
+}
+
+.icon-box--orange {
+  background: var(--color-orange);
+  color: var(--color-black);
+}
+
+.icon-box--purple {
+  background: var(--color-purple);
+  color: var(--color-black);
+}
+
+.icon-box--green {
+  background: var(--color-green);
+  color: var(--color-black);
+}
+
+.icon-box--yellow {
+  background: var(--color-yellow);
+  color: var(--color-black);
+}
+
+.icon-box--blue {
+  background: var(--color-blue);
+  color: var(--color-white);
+}
+
+.icon-box--gray {
+  background: var(--color-gray);
+  color: var(--color-gray-dark);
+}
+
+/* Email Generator Header */
+.email-generator__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Custom Email Header */
+.custom-email__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+/* Inbox Title Wrap */
+.inbox__title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Login Header */
+.login-box__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* Section Title with Icon */
+.section__title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Stat Card Icon */
+.stat-card__icon {
+  margin: 0 auto 1rem;
 }
 
 /* Responsive */
@@ -595,8 +722,13 @@ h3 { font-size: 1.5rem; }
     padding: 0.5rem;
   }
 
-  h1 { font-size: 1.75rem; }
-  h2 { font-size: 1.5rem; }
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
 }
 
 /* ===========================================
@@ -678,7 +810,8 @@ table {
   border: var(--border-width) solid var(--color-black);
 }
 
-th, td {
+th,
+td {
   padding: 1rem;
   text-align: left;
   border-bottom: 2px solid var(--color-gray);

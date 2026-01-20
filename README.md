@@ -1,15 +1,18 @@
-# Hubify ID - Temporary Email System
+# Hubify Store - Temporary Email System
 
-📧 A self-hosted temporary email service with Neo-brutalism UI.
+📧 Self-hosted temporary email service with Neo-brutalism UI.
+
+**Web Access**: `https://mail.hubify.store`  
+**Email Domain**: `@hubify.store`
 
 ## Features
 
 - ✅ Infinite disposable email addresses
-- ✅ Multiple domain support (5-10 domains)
+- ✅ Multiple domain support
 - ✅ 24-hour email TTL with auto-cleanup
 - ✅ Real-time inbox polling
 - ✅ Admin dashboard with statistics
-- ✅ Neo-brutalism design
+- ✅ Neo-brutalism design with vector icons
 - ✅ Mobile responsive
 
 ## Tech Stack
@@ -37,7 +40,10 @@ hubify-mail/
 │   ├── js/            # Frontend logic
 │   ├── index.html     # Main page
 │   └── admin.html     # Admin dashboard
-└── sql/               # Database schema
+├── sql/               # Database schema
+└── docs/              # Documentation
+    ├── vps-setup.md   # VPS deployment guide
+    └── domain-guide.md # Domain management
 ```
 
 ## Quick Start (Development)
@@ -48,7 +54,7 @@ hubify-mail/
 # Create PostgreSQL database
 psql -U postgres
 CREATE DATABASE hubify_mail;
-CREATE USER hubify WITH PASSWORD 'your_password';
+CREATE USER hubify WITH PASSWORD 'yourpassword';
 GRANT ALL ON DATABASE hubify_mail TO hubify;
 \q
 
@@ -113,6 +119,10 @@ node scripts/create-admin.js admin yourpassword
 ## Production Deployment
 
 See [VPS Setup Guide](docs/vps-setup.md) for full deployment instructions.
+
+## Adding New Domains
+
+See [Domain Guide](docs/domain-guide.md) for adding new email domains.
 
 ## License
 

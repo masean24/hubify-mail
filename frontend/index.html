@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Hubify ID - Free temporary email service. Get instant disposable email addresses for verification and privacy.">
-  <title>Hubify ID - Temporary Email</title>
+  <meta name="description"
+    content="Hubify Store - Free temporary email service. Get instant disposable email addresses for verification and privacy.">
+  <title>Hubify Store - Temporary Email</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/brutalism.css">
 </head>
+
 <body>
   <!-- Header -->
   <header class="header">
     <div class="header__inner">
       <a href="/" class="header__logo">
-        <span>Hubify</span> ID
+        <span>HUBIFY</span>.STORE
       </a>
       <a href="/admin.html" class="btn btn--small btn--yellow">Admin</a>
     </div>
@@ -25,61 +28,95 @@
   <main class="main">
     <!-- TTL Indicator -->
     <div class="ttl" id="ttl-indicator">
-      <span class="ttl__icon">⏱️</span>
+      <div class="icon-box icon-box--cyan">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12,6 12,12 16,14" />
+        </svg>
+      </div>
       <span id="ttl-text">Email aktif selama 24 jam</span>
     </div>
 
     <!-- Email Generator -->
     <section class="email-generator brutal-box brutal-box--yellow">
-      <h1 class="email-generator__title">📧 Your Temporary Email Address</h1>
-      
+      <div class="email-generator__header">
+        <div class="icon-box icon-box--pink">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
+          </svg>
+        </div>
+        <h1 class="email-generator__title">YOUR TEMPORARY EMAIL ADDRESS</h1>
+      </div>
+
       <div class="email-generator__box">
-        <input 
-          type="text" 
-          class="input email-generator__input" 
-          id="email-display" 
-          readonly 
-          value="Loading..."
-        >
+        <input type="text" class="input email-generator__input" id="email-display" readonly value="Loading...">
         <button class="btn btn--green btn--icon" id="btn-copy" title="Copy Email">
-          📋
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
         </button>
       </div>
 
       <div class="email-generator__actions">
         <button class="btn" id="btn-refresh">
-          🔄 Refresh
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23,4 23,10 17,10" />
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+          </svg>
+          REFRESH
         </button>
         <button class="btn btn--blue" id="btn-new">
-          ✨ New
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          NEW
         </button>
         <button class="btn btn--red" id="btn-delete">
-          🗑️ Delete
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3,6 5,6 21,6" />
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          </svg>
+          DELETE
         </button>
       </div>
     </section>
 
     <!-- Custom Email -->
     <section class="custom-email brutal-box">
-      <h2 class="custom-email__title">🔧 Or Use Custom Email</h2>
+      <div class="custom-email__header">
+        <div class="icon-box icon-box--purple">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+        </div>
+        <h2 class="custom-email__title">OR USE CUSTOM EMAIL</h2>
+      </div>
       <form class="custom-email__form" id="custom-form">
-        <input 
-          type="text" 
-          class="input custom-email__input" 
-          id="custom-local" 
-          placeholder="username"
-          pattern="[a-zA-Z0-9._-]+"
-        >
+        <input type="text" class="input custom-email__input" id="custom-local" placeholder="username"
+          pattern="[a-zA-Z0-9._-]+">
         <span class="custom-email__at">@</span>
         <select class="select" id="custom-domain"></select>
-        <button type="submit" class="btn btn--green">Use</button>
+        <button type="submit" class="btn btn--green">USE</button>
       </form>
     </section>
 
     <!-- Inbox -->
     <section class="inbox brutal-box">
       <div class="inbox__header">
-        <h2 class="inbox__title">📬 Inbox</h2>
+        <div class="inbox__title-wrap">
+          <div class="icon-box icon-box--orange">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+              <path
+                d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+            </svg>
+          </div>
+          <h2 class="inbox__title">INBOX</h2>
+        </div>
         <div class="inbox__status">
           <div class="inbox__status-dot"></div>
           <span>Auto-refresh</span>
@@ -88,7 +125,13 @@
 
       <div id="inbox-content">
         <div class="inbox__empty">
-          <div class="inbox__empty-icon">📭</div>
+          <div class="icon-box icon-box--gray icon-box--large">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+              <path
+                d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+            </svg>
+          </div>
           <p class="inbox__empty-text">No Messages</p>
           <p class="inbox__empty-sub">Waiting for incoming messages...</p>
         </div>
@@ -121,9 +164,10 @@
 
   <!-- Footer -->
   <footer class="footer">
-    <p>&copy; 2024 Hubify ID. Free temporary email service.</p>
+    <p>&copy; 2024 Hubify Store. Free temporary email service.</p>
   </footer>
 
   <script type="module" src="./js/main.js"></script>
 </body>
+
 </html>
