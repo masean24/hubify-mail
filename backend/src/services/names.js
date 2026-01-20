@@ -158,6 +158,14 @@ export const getNamesCount = async () => {
     return result.rows[0];
 };
 
+/**
+ * Delete all names
+ */
+export const deleteAllNames = async () => {
+    const result = await db.query('DELETE FROM names RETURNING id');
+    return { count: result.rowCount };
+};
+
 export default {
     getAllNames,
     getActiveNames,
@@ -167,5 +175,6 @@ export default {
     addBulkNames,
     updateName,
     deleteName,
+    deleteAllNames,
     getNamesCount,
 };

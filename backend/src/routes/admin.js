@@ -410,6 +410,28 @@ router.delete('/names/:id', async (req, res) => {
 });
 
 /**
+ * DELETE /api/admin/names/all
+ * Delete all names
+ */
+router.delete('/names/all', async (req, res) => {
+    try {
+        const result = await namesService.deleteAllNames();
+
+        res.json({
+            success: true,
+            message: `Deleted ${result.count} names`,
+            deletedCount: result.count,
+        });
+    } catch (error) {
+        console.error('Error deleting all names:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to delete names',
+        });
+    }
+});
+
+/**
  * POST /api/admin/names/bulk
  * Bulk add names from file upload
  * Body: { names: string[] | { name: string, gender: string }[], gender?: string }

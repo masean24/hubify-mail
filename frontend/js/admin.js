@@ -38,6 +38,7 @@ const elements = {
     namesFilterStatus: document.getElementById('names-filter-status'),
     btnAddName: document.getElementById('btn-add-name'),
     btnBulkAdd: document.getElementById('btn-bulk-add'),
+    btnDeleteAllNames: document.getElementById('btn-delete-all-names'),
     nameModal: document.getElementById('name-modal'),
     nameModalClose: document.getElementById('name-modal-close'),
     addNameForm: document.getElementById('add-name-form'),
@@ -413,6 +414,29 @@ async function deleteName(id) {
     }
 }
 
+async function deleteAllNames() {
+    const count = allNames.length;
+    if (!confirm(`Are you sure you want to delete ALL ${count} names? This cannot be undone!`)) return;
+
+    try {
+        const res = await fetch(`${API_BASE}/admin/names/all`, {
+            method: 'DELETE',
+            headers: getAuthHeaders(),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showToast(`Deleted ${data.deletedCount} names!`, 'success');
+            fetchNames();
+        } else {
+            showToast(data.error || 'Failed to delete names', 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting all names:', error);
+        showToast('Failed to delete names', 'error');
+    }
+}
+
 function renderNamesGrid(names) {
     // Apply filters
     const searchTerm = elements.namesSearch?.value.toLowerCase() || '';
@@ -473,7 +497,7 @@ function hideBulkModal() {
 
 async function processBulkAdd() {
     let names = [];
-    const gender = elements.bulkGender.value;
+    const defaultGender = elements.bulkGender.value;
 
     // Check file first
     const file = elements.bulkFile.files[0];
@@ -491,11 +515,17 @@ async function processBulkAdd() {
         return;
     }
 
+    // Apply default gender to names without gender
+    const namesWithGender = names.map(item => ({
+        name: item.name,
+        gender: item.gender || defaultGender
+    }));
+
     try {
         const res = await fetch(`${API_BASE}/admin/names/bulk`, {
             method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify({ names, gender }),
+            body: JSON.stringify({ names: namesWithGender }),
         });
         const data = await res.json();
 
@@ -517,9 +547,28 @@ async function processBulkAdd() {
 
 function parseNamesText(text) {
     return text
-        .split(/[\r\n,]+/)
+        .split(/[\r\n]+/)  // Split by newlines only
         .map(line => line.trim())
-        .filter(line => line && /^[a-zA-Z]+$/.test(line));
+        .filter(line => line.length > 0)
+        .map(line => {
+            // Check if line has gender (format: name,gender)
+            const parts = line.split(',').map(p => p.trim());
+            const name = parts[0];
+            const gender = parts[1] || null; // null means use default from dropdown
+
+            // Validate name (letters only)
+            if (!name || !/^[a-zA-Z]+$/.test(name)) {
+                return null;
+            }
+
+            // Validate gender if provided
+            if (gender && !['male', 'female', 'neutral'].includes(gender.toLowerCase())) {
+                return { name, gender: null }; // Invalid gender, use default
+            }
+
+            return gender ? { name, gender: gender.toLowerCase() } : { name };
+        })
+        .filter(item => item !== null);
 }
 
 function showNameModal() {
@@ -590,6 +639,7 @@ document.addEventListener('keydown', (e) => {
 
 // Names event listeners
 elements.btnAddName.addEventListener('click', showNameModal);
+elements.btnDeleteAllNames.addEventListener('click', deleteAllNames);
 
 elements.nameModalClose.addEventListener('click', hideNameModal);
 
