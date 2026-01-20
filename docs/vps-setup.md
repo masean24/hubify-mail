@@ -46,7 +46,7 @@ sudo apt install -y postfix
 
 During installation:
 - Select "Internet Site"
-- Enter your primary domain (e.g., hubify.id)
+- Enter your primary domain (e.g., hubify.store)
 
 ## Step 5: Clone & Setup Application
 
@@ -98,7 +98,7 @@ sudo nano /etc/postfix/main.cf
 Add at the end:
 ```ini
 # Hubify Mail Config
-virtual_alias_domains = hubify.id, mail.hubify.id, temp.hubify.id
+virtual_alias_domains = hubify.store, mail.hubify.store, temp.hubify.store
 virtual_alias_maps = regexp:/etc/postfix/virtual
 ```
 
@@ -160,7 +160,7 @@ Add:
 ```nginx
 server {
     listen 80;
-    server_name mail.hubify.id;
+    server_name mail.hubify.store;
 
     # Frontend
     location / {
@@ -190,7 +190,7 @@ sudo systemctl restart nginx
 
 ```bash
 sudo apt install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d mail.hubify.id
+sudo certbot --nginx -d mail.hubify.store
 ```
 
 ## Step 13: DNS Configuration
@@ -200,7 +200,7 @@ Add these records in your DNS provider:
 | Type | Name | Value | Priority |
 |------|------|-------|----------|
 | A | mail | [Your VPS IP] | - |
-| MX | @ | mail.hubify.id | 10 |
+| MX | @ | mail.hubify.store | 10 |
 
 For each temp email domain:
 | Type | Name | Value | Priority |
@@ -221,14 +221,14 @@ sudo ufw enable
 
 ```bash
 # Test sending email
-echo "Test message" | mail -s "Test" test@hubify.id
+echo "Test message" | mail -s "Test" test@hubify.store
 
 # Check logs
 pm2 logs hubify-api
 sudo tail -f /var/log/mail.log
 ```
 
-Open https://mail.hubify.id in browser.
+Open https://mail.hubify.store in browser.
 
 ## Maintenance
 
@@ -256,7 +256,7 @@ pm2 restart hubify-api
 ## Troubleshooting
 
 ### Email not received
-1. Check MX records: `dig MX hubify.id`
+1. Check MX records: `dig MX hubify.store`
 2. Check Postfix logs: `sudo tail -f /var/log/mail.log`
 3. Verify Postfix is running: `sudo systemctl status postfix`
 

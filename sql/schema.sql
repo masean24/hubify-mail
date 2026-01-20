@@ -54,9 +54,9 @@ CREATE INDEX idx_domains_active ON domains(is_active);
 
 -- Insert sample domains (modify as needed)
 INSERT INTO domains (domain) VALUES 
-  ('hubify.id'),
-  ('mail.hubify.id'),
-  ('temp.hubify.id');
+  ('hubify.store'),
+  ('mail.hubify.store'),
+  ('temp.hubify.store');
 
 -- Display success message
 SELECT 'Database schema created successfully!' as message;

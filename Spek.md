@@ -68,7 +68,7 @@ All emails go to one storage, then separated logically.
 2. System generates:
    - Random local-part (e.g. `abc123`)
    - User selects domain from dropdown
-3. Generated email is shown to user (e.g. `abc123@hubify.id`)
+3. Generated email is shown to user (e.g. `abc123@hubify.store`)
 4. User can also:
    - Enter custom local-part + select domain
    - Enter full email address to check existing inbox
