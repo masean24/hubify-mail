@@ -4,6 +4,7 @@ import adminService from '../services/admin.js';
 import domainService from '../services/domain.js';
 import inboxService from '../services/inbox.js';
 import cleanupService from '../services/cleanup.js';
+import namesService from '../services/names.js';
 
 const router = Router();
 
@@ -283,4 +284,130 @@ router.post('/cleanup', async (req, res) => {
     }
 });
 
+// ============================
+// NAMES MANAGEMENT ROUTES
+// ============================
+
+/**
+ * GET /api/admin/names
+ * Get all names
+ */
+router.get('/names', async (req, res) => {
+    try {
+        const names = await namesService.getAllNames();
+        const stats = await namesService.getNamesCount();
+        res.json({
+            success: true,
+            data: names,
+            stats,
+        });
+    } catch (error) {
+        console.error('Error fetching names:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch names',
+        });
+    }
+});
+
+/**
+ * POST /api/admin/names
+ * Add new name
+ */
+router.post('/names', async (req, res) => {
+    try {
+        const { name, gender } = req.body;
+
+        if (!name) {
+            return res.status(400).json({
+                success: false,
+                error: 'Name is required',
+            });
+        }
+
+        // Validate name format (letters only, lowercase)
+        if (!/^[a-zA-Z]+$/.test(name)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Name must contain only letters',
+            });
+        }
+
+        const newName = await namesService.addName(name, gender || 'neutral');
+
+        res.status(201).json({
+            success: true,
+            data: newName,
+        });
+    } catch (error) {
+        console.error('Error creating name:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to create name',
+        });
+    }
+});
+
+/**
+ * PATCH /api/admin/names/:id
+ * Update name
+ */
+router.patch('/names/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, gender, is_active } = req.body;
+
+        const updated = await namesService.updateName(id, { name, gender, is_active });
+
+        if (!updated) {
+            return res.status(404).json({
+                success: false,
+                error: 'Name not found',
+            });
+        }
+
+        res.json({
+            success: true,
+            data: updated,
+        });
+    } catch (error) {
+        console.error('Error updating name:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to update name',
+        });
+    }
+});
+
+/**
+ * DELETE /api/admin/names/:id
+ * Delete name
+ */
+router.delete('/names/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const deleted = await namesService.deleteName(id);
+
+        if (!deleted) {
+            return res.status(404).json({
+                success: false,
+                error: 'Name not found',
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Name deleted successfully',
+        });
+    } catch (error) {
+        console.error('Error deleting name:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to delete name',
+        });
+    }
+});
+
 export default router;
+

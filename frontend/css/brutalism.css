@@ -320,8 +320,9 @@ h3 {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
+  color: var(--color-gray-dark);
 }
 
 .inbox__status-dot {
@@ -329,7 +330,28 @@ h3 {
   height: 10px;
   background: var(--color-green);
   border: 2px solid var(--color-black);
+  border-radius: 50%;
   animation: pulse 2s infinite;
+  transition: all 0.2s;
+}
+
+.inbox__status-dot.loading {
+  background: var(--color-orange);
+  animation: spin-dot 0.5s linear infinite;
+}
+
+@keyframes spin-dot {
+  0% {
+    transform: rotate(0deg) scale(1.2);
+  }
+
+  50% {
+    transform: rotate(180deg) scale(0.8);
+  }
+
+  100% {
+    transform: rotate(360deg) scale(1.2);
+  }
 }
 
 @keyframes pulse {

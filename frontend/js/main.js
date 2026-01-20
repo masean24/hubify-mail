@@ -9,6 +9,8 @@ const API_BASE = '/api';
 let currentEmail = null;
 let currentDomains = [];
 let pollInterval = null;
+let lastRefreshTime = null;
+let refreshCounterInterval = null;
 
 // DOM Elements
 const elements = {
@@ -23,6 +25,8 @@ const elements = {
     inboxContent: document.getElementById('inbox-content'),
     emailList: document.getElementById('email-list'),
     ttlText: document.getElementById('ttl-text'),
+    inboxStatus: document.querySelector('.inbox__status'),
+    inboxStatusDot: document.querySelector('.inbox__status-dot'),
     modal: document.getElementById('email-modal'),
     modalClose: document.getElementById('modal-close'),
     modalSubject: document.getElementById('modal-subject'),
@@ -71,7 +75,26 @@ function formatTTL(expiresAt) {
     const hours = Math.floor(diff / 3600000);
     const minutes = Math.floor((diff % 3600000) / 60000);
 
-    return `⏱️ Expires in ${hours}h ${minutes}m`;
+    return `Expires in ${hours}h ${minutes}m`;
+}
+
+function formatLastRefresh() {
+    if (!lastRefreshTime) return 'Never';
+    const now = new Date();
+    const diff = Math.floor((now - lastRefreshTime) / 1000);
+
+    if (diff < 5) return 'Just now';
+    if (diff < 60) return `${diff}s ago`;
+    return `${Math.floor(diff / 60)}m ago`;
+}
+
+function updateRefreshCounter() {
+    if (elements.inboxStatus) {
+        const statusText = elements.inboxStatus.querySelector('span');
+        if (statusText) {
+            statusText.textContent = `Last: ${formatLastRefresh()}`;
+        }
+    }
 }
 
 // API Functions
@@ -140,6 +163,9 @@ async function useCustomEmail(localPart, domainId) {
 async function fetchInbox() {
     if (!currentEmail) return;
 
+    // Show loading state
+    setLoadingState(true);
+
     try {
         const res = await fetch(`${API_BASE}/inbox/${encodeURIComponent(currentEmail)}`);
         const data = await res.json();
@@ -149,9 +175,14 @@ async function fetchInbox() {
             if (data.data.expiresAt) {
                 elements.ttlText.textContent = formatTTL(data.data.expiresAt);
             }
+            // Update last refresh time
+            lastRefreshTime = new Date();
+            updateRefreshCounter();
         }
     } catch (error) {
         console.error('Error fetching inbox:', error);
+    } finally {
+        setLoadingState(false);
     }
 }
 
@@ -193,6 +224,16 @@ async function deleteInbox() {
 }
 
 // UI Functions
+function setLoadingState(isLoading) {
+    if (elements.inboxStatusDot) {
+        if (isLoading) {
+            elements.inboxStatusDot.classList.add('loading');
+        } else {
+            elements.inboxStatusDot.classList.remove('loading');
+        }
+    }
+}
+
 function setCurrentEmail(email, expiresAt) {
     currentEmail = email;
     elements.emailDisplay.value = email;
@@ -288,12 +329,20 @@ function copyToClipboard(text) {
 function startPolling() {
     if (pollInterval) clearInterval(pollInterval);
     pollInterval = setInterval(fetchInbox, 5000);
+
+    // Start refresh counter
+    if (refreshCounterInterval) clearInterval(refreshCounterInterval);
+    refreshCounterInterval = setInterval(updateRefreshCounter, 1000);
 }
 
 function stopPolling() {
     if (pollInterval) {
         clearInterval(pollInterval);
         pollInterval = null;
+    }
+    if (refreshCounterInterval) {
+        clearInterval(refreshCounterInterval);
+        refreshCounterInterval = null;
     }
 }
 

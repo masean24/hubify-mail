@@ -6,11 +6,21 @@ DROP TABLE IF EXISTS emails CASCADE;
 DROP TABLE IF EXISTS inboxes CASCADE;
 DROP TABLE IF EXISTS domains CASCADE;
 DROP TABLE IF EXISTS admin_users CASCADE;
+DROP TABLE IF EXISTS names CASCADE;
 
 -- Domains table
 CREATE TABLE domains (
   id SERIAL PRIMARY KEY,
   domain VARCHAR(255) UNIQUE NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Names table (for human-like email generation)
+CREATE TABLE names (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  gender VARCHAR(10) DEFAULT 'neutral', -- male, female, neutral
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT NOW()
 );
@@ -51,12 +61,41 @@ CREATE INDEX idx_inboxes_local_domain ON inboxes(local_part, domain_id);
 CREATE INDEX idx_emails_inbox ON emails(inbox_id);
 CREATE INDEX idx_emails_received ON emails(received_at);
 CREATE INDEX idx_domains_active ON domains(is_active);
+CREATE INDEX idx_names_active ON names(is_active);
 
 -- Insert sample domains (modify as needed)
 INSERT INTO domains (domain) VALUES 
   ('hubify.store'),
   ('mail.hubify.store'),
   ('temp.hubify.store');
+
+-- Insert sample names (Indonesian names)
+INSERT INTO names (name, gender) VALUES 
+  ('budi', 'male'),
+  ('andi', 'male'),
+  ('agus', 'male'),
+  ('deni', 'male'),
+  ('eko', 'male'),
+  ('fajar', 'male'),
+  ('gilang', 'male'),
+  ('hendra', 'male'),
+  ('irwan', 'male'),
+  ('joko', 'male'),
+  ('dewi', 'female'),
+  ('sari', 'female'),
+  ('putri', 'female'),
+  ('maya', 'female'),
+  ('rina', 'female'),
+  ('wati', 'female'),
+  ('yuni', 'female'),
+  ('ani', 'female'),
+  ('sri', 'female'),
+  ('lina', 'female'),
+  ('alex', 'neutral'),
+  ('rian', 'neutral'),
+  ('dika', 'neutral'),
+  ('yoga', 'neutral'),
+  ('tara', 'neutral');
 
 -- Display success message
 SELECT 'Database schema created successfully!' as message;

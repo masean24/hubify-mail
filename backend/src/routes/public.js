@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import domainService from '../services/domain.js';
 import inboxService from '../services/inbox.js';
+import namesService from '../services/names.js';
 
 const router = Router();
 
@@ -26,7 +27,7 @@ router.get('/domains', async (req, res) => {
 
 /**
  * POST /api/inbox/generate
- * Generate random email address
+ * Generate random email address using human names
  * Body: { domainId: number }
  */
 router.post('/inbox/generate', async (req, res) => {
@@ -49,8 +50,10 @@ router.post('/inbox/generate', async (req, res) => {
             });
         }
 
-        // Generate random local part
-        const localPart = inboxService.generateRandomLocalPart();
+        // Generate random local part using human name
+        const randomName = await namesService.getRandomName();
+        const randomNum = Math.floor(Math.random() * 9000) + 1000; // 4-digit number
+        const localPart = randomName ? `${randomName}${randomNum}` : inboxService.generateRandomLocalPart();
 
         // Create inbox
         const inbox = await inboxService.getOrCreateInbox(localPart, domainId);
