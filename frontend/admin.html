@@ -174,26 +174,33 @@
                                 <circle cx="12" cy="7" r="4" />
                             </svg>
                         </div>
-                        NAMES
+                        NAMES <span id="names-count" style="font-weight: 400; font-size: 0.875rem;"></span>
                     </h2>
-                    <button class="btn btn--small btn--purple" id="btn-add-name">+ Add Name</button>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn--small" id="btn-bulk-add">📁 Bulk Add</button>
+                        <button class="btn btn--small btn--purple" id="btn-add-name">+ Add Name</button>
+                    </div>
                 </div>
-                <p style="margin-bottom: 1rem; opacity: 0.8;">Names used for random email generation (format: firstname
-                    + lastname + 2 digits)</p>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Gender</th>
-                                <th>Status</th>
-                                <th>Created</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="names-table"></tbody>
-                    </table>
+
+                <!-- Search and Filter -->
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                    <input type="text" class="input" id="names-search" placeholder="Search names..."
+                        style="flex: 1; min-width: 150px;">
+                    <select class="select" id="names-filter-gender">
+                        <option value="">All Genders</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="neutral">Neutral</option>
+                    </select>
+                    <select class="select" id="names-filter-status">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
                 </div>
+
+                <!-- Compact Grid -->
+                <div class="names-grid" id="names-grid"></div>
             </section>
 
             <!-- Cleanup -->
@@ -288,6 +295,41 @@
                         </select>
                     </div>
                     <button type="submit" class="btn btn--purple" style="width: 100%;">Add Name</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Add Names Modal -->
+    <div class="modal" id="bulk-modal">
+        <div class="modal__content" style="max-width: 500px;">
+            <div class="modal__header">
+                <h3 class="modal__title">Bulk Add Names</h3>
+                <button class="modal__close" id="bulk-modal-close">✕</button>
+            </div>
+            <div class="modal__body">
+                <form id="bulk-add-form">
+                    <div class="form-group">
+                        <label>Upload File (.txt or .csv)</label>
+                        <input type="file" class="input" id="bulk-file" accept=".txt,.csv" style="padding: 0.5rem;">
+                        <small style="opacity: 0.7;">One name per line, or CSV format: name,gender</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Or paste names directly (one per line)</label>
+                        <textarea class="input" id="bulk-textarea" rows="6" placeholder="john
+sarah
+alex
+michael"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="bulk-gender">Default Gender (for names without gender)</label>
+                        <select class="select" id="bulk-gender">
+                            <option value="neutral">Neutral</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn--purple" style="width: 100%;">Add All Names</button>
                 </form>
             </div>
         </div>

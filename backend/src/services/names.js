@@ -31,6 +31,33 @@ export const getRandomName = async () => {
 };
 
 /**
+ * Get random active name by gender
+ * If gender is 'random', picks a random gender (male/female) first
+ * Neutral names can be used with any gender
+ */
+export const getRandomNameByGender = async (gender = 'random') => {
+    let targetGender = gender;
+
+    // If random, pick male or female randomly
+    if (gender === 'random') {
+        targetGender = Math.random() < 0.5 ? 'male' : 'female';
+    }
+
+    // Get name matching the gender OR neutral (neutral can be used anywhere)
+    const result = await db.query(
+        `SELECT name FROM names 
+         WHERE is_active = true AND (gender = $1 OR gender = 'neutral')
+         ORDER BY RANDOM() LIMIT 1`,
+        [targetGender]
+    );
+
+    return {
+        name: result.rows[0]?.name || null,
+        gender: targetGender
+    };
+};
+
+/**
  * Add new name
  */
 export const addName = async (name, gender = 'neutral') => {
@@ -39,6 +66,42 @@ export const addName = async (name, gender = 'neutral') => {
         [name.toLowerCase(), gender]
     );
     return result.rows[0];
+};
+
+/**
+ * Add multiple names at once (bulk add)
+ */
+export const addBulkNames = async (namesArray) => {
+    const results = [];
+    const errors = [];
+
+    for (const item of namesArray) {
+        try {
+            // Handle both string and object format
+            const name = typeof item === 'string' ? item.trim() : item.name?.trim();
+            const gender = typeof item === 'string' ? 'neutral' : (item.gender || 'neutral');
+
+            if (!name || !/^[a-zA-Z]+$/.test(name)) {
+                errors.push({ name, error: 'Invalid name format' });
+                continue;
+            }
+
+            const result = await db.query(
+                'INSERT INTO names (name, gender) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING *',
+                [name.toLowerCase(), gender]
+            );
+
+            if (result.rows[0]) {
+                results.push(result.rows[0]);
+            } else {
+                errors.push({ name, error: 'Already exists' });
+            }
+        } catch (err) {
+            errors.push({ name: item, error: err.message });
+        }
+    }
+
+    return { added: results, errors };
 };
 
 /**
@@ -99,7 +162,9 @@ export default {
     getAllNames,
     getActiveNames,
     getRandomName,
+    getRandomNameByGender,
     addName,
+    addBulkNames,
     updateName,
     deleteName,
     getNamesCount,

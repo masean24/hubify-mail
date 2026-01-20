@@ -51,11 +51,14 @@ router.post('/inbox/generate', async (req, res) => {
         }
 
         // Generate random local part using two human names (firstname + lastname) + 2 digits
-        const firstName = await namesService.getRandomName();
-        const lastName = await namesService.getRandomName();
+        // Gender matching: if male, both names are male. if female, both names are female.
+        const { gender } = req.body;
+        const firstNameResult = await namesService.getRandomNameByGender(gender || 'random');
+        const lastNameResult = await namesService.getRandomNameByGender(firstNameResult.gender);
+
         const randomNum = Math.floor(Math.random() * 90) + 10; // 2-digit number (10-99)
-        const localPart = (firstName && lastName)
-            ? `${firstName}${lastName}${randomNum}`
+        const localPart = (firstNameResult.name && lastNameResult.name)
+            ? `${firstNameResult.name}${lastNameResult.name}${randomNum}`
             : inboxService.generateRandomLocalPart();
 
         // Create inbox

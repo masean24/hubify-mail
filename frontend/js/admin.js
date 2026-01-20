@@ -31,14 +31,28 @@ const elements = {
     newDomainInput: document.getElementById('new-domain'),
     toastContainer: document.getElementById('toast-container'),
     // Names management
-    namesTable: document.getElementById('names-table'),
+    namesGrid: document.getElementById('names-grid'),
+    namesCount: document.getElementById('names-count'),
+    namesSearch: document.getElementById('names-search'),
+    namesFilterGender: document.getElementById('names-filter-gender'),
+    namesFilterStatus: document.getElementById('names-filter-status'),
     btnAddName: document.getElementById('btn-add-name'),
+    btnBulkAdd: document.getElementById('btn-bulk-add'),
     nameModal: document.getElementById('name-modal'),
     nameModalClose: document.getElementById('name-modal-close'),
     addNameForm: document.getElementById('add-name-form'),
     newNameInput: document.getElementById('new-name'),
     newNameGender: document.getElementById('new-name-gender'),
+    bulkModal: document.getElementById('bulk-modal'),
+    bulkModalClose: document.getElementById('bulk-modal-close'),
+    bulkAddForm: document.getElementById('bulk-add-form'),
+    bulkFile: document.getElementById('bulk-file'),
+    bulkTextarea: document.getElementById('bulk-textarea'),
+    bulkGender: document.getElementById('bulk-gender'),
 };
+
+// State for names
+let allNames = [];
 
 // Utils
 function showToast(message, type = 'success') {
@@ -326,7 +340,8 @@ async function fetchNames() {
         const data = await res.json();
 
         if (data.success) {
-            renderNamesTable(data.data);
+            allNames = data.data;
+            renderNamesGrid(allNames);
         }
     } catch (error) {
         console.error('Error fetching names:', error);
@@ -398,36 +413,113 @@ async function deleteName(id) {
     }
 }
 
-function renderNamesTable(names) {
-    if (names.length === 0) {
-        elements.namesTable.innerHTML = `
-      <tr><td colspan="5" style="text-align: center;">No names yet. Add some!</td></tr>
-    `;
+function renderNamesGrid(names) {
+    // Apply filters
+    const searchTerm = elements.namesSearch?.value.toLowerCase() || '';
+    const genderFilter = elements.namesFilterGender?.value || '';
+    const statusFilter = elements.namesFilterStatus?.value || '';
+
+    let filtered = names.filter(n => {
+        if (searchTerm && !n.name.toLowerCase().includes(searchTerm)) return false;
+        if (genderFilter && n.gender !== genderFilter) return false;
+        if (statusFilter === 'active' && !n.is_active) return false;
+        if (statusFilter === 'inactive' && n.is_active) return false;
+        return true;
+    });
+
+    // Update count
+    if (elements.namesCount) {
+        elements.namesCount.textContent = `(${filtered.length}/${names.length})`;
+    }
+
+    if (filtered.length === 0) {
+        elements.namesGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 2rem;">No names found</p>';
         return;
     }
 
-    elements.namesTable.innerHTML = names
-        .map(
-            (n) => `
-      <tr>
-        <td><strong>${escapeHtml(n.name)}</strong></td>
-        <td>${escapeHtml(n.gender)}</td>
-        <td>
-          <span class="badge ${n.is_active ? 'badge--success' : 'badge--danger'}">
-            ${n.is_active ? 'Active' : 'Inactive'}
-          </span>
-        </td>
-        <td>${formatDate(n.created_at)}</td>
-        <td>
-          <button class="btn btn--small ${n.is_active ? 'btn--yellow' : 'btn--green'}" onclick="toggleName(${n.id}, ${!n.is_active})">
-            ${n.is_active ? 'Disable' : 'Enable'}
-          </button>
-          <button class="btn btn--small btn--red" onclick="deleteName(${n.id})">Delete</button>
-        </td>
-      </tr>
-    `
-        )
+    elements.namesGrid.innerHTML = filtered
+        .map(n => `
+            <div class="name-card ${n.is_active ? '' : 'name-card--inactive'}">
+                <div class="name-card__header">
+                    <span class="name-card__name">${escapeHtml(n.name)}</span>
+                    <span class="name-card__gender name-card__gender--${n.gender}">${n.gender}</span>
+                </div>
+                <div class="name-card__actions">
+                    <button class="btn ${n.is_active ? 'btn--yellow' : 'btn--green'}" onclick="toggleName(${n.id}, ${!n.is_active})">
+                        ${n.is_active ? 'Disable' : 'Enable'}
+                    </button>
+                    <button class="btn btn--red" onclick="deleteName(${n.id})">Del</button>
+                </div>
+            </div>
+        `)
         .join('');
+}
+
+function applyNamesFilter() {
+    renderNamesGrid(allNames);
+}
+
+// Bulk Add Functions
+function showBulkModal() {
+    elements.bulkModal.classList.add('active');
+    elements.bulkTextarea.value = '';
+    elements.bulkFile.value = '';
+    elements.bulkGender.value = 'neutral';
+}
+
+function hideBulkModal() {
+    elements.bulkModal.classList.remove('active');
+}
+
+async function processBulkAdd() {
+    let names = [];
+    const gender = elements.bulkGender.value;
+
+    // Check file first
+    const file = elements.bulkFile.files[0];
+    if (file) {
+        const text = await file.text();
+        names = parseNamesText(text);
+    } else {
+        // Use textarea
+        const text = elements.bulkTextarea.value;
+        names = parseNamesText(text);
+    }
+
+    if (names.length === 0) {
+        showToast('No valid names found', 'error');
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_BASE}/admin/names/bulk`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ names, gender }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showToast(`Added ${data.data.added.length} names!`, 'success');
+            if (data.data.errors.length > 0) {
+                showToast(`${data.data.errors.length} names skipped`, 'error');
+            }
+            hideBulkModal();
+            fetchNames();
+        } else {
+            showToast(data.error || 'Failed to bulk add', 'error');
+        }
+    } catch (error) {
+        console.error('Error bulk adding:', error);
+        showToast('Failed to bulk add names', 'error');
+    }
+}
+
+function parseNamesText(text) {
+    return text
+        .split(/[\r\n,]+/)
+        .map(line => line.trim())
+        .filter(line => line && /^[a-zA-Z]+$/.test(line));
 }
 
 function showNameModal() {
@@ -492,6 +584,7 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         hideDomainModal();
         hideNameModal();
+        hideBulkModal();
     }
 });
 
@@ -514,6 +607,27 @@ elements.addNameForm.addEventListener('submit', (e) => {
         addName(name, gender);
     }
 });
+
+// Bulk Add event listeners
+elements.btnBulkAdd.addEventListener('click', showBulkModal);
+
+elements.bulkModalClose.addEventListener('click', hideBulkModal);
+
+elements.bulkModal.addEventListener('click', (e) => {
+    if (e.target === elements.bulkModal) {
+        hideBulkModal();
+    }
+});
+
+elements.bulkAddForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    processBulkAdd();
+});
+
+// Search and Filter event listeners
+elements.namesSearch.addEventListener('input', applyNamesFilter);
+elements.namesFilterGender.addEventListener('change', applyNamesFilter);
+elements.namesFilterStatus.addEventListener('change', applyNamesFilter);
 
 // Initialize
 function init() {

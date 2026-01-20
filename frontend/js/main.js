@@ -24,6 +24,7 @@ const elements = {
     customDomain: document.getElementById('custom-domain'),
     inboxContent: document.getElementById('inbox-content'),
     emailList: document.getElementById('email-list'),
+    genderSelect: document.getElementById('gender-select'),
     ttlText: document.getElementById('ttl-text'),
     inboxStatus: document.querySelector('.inbox__status'),
     inboxStatusDot: document.querySelector('.inbox__status-dot'),
@@ -120,10 +121,11 @@ async function generateEmail() {
 
     try {
         const domainId = currentDomains[0].id;
+        const gender = elements.genderSelect?.value || 'random';
         const res = await fetch(`${API_BASE}/inbox/generate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ domainId }),
+            body: JSON.stringify({ domainId, gender }),
         });
         const data = await res.json();
 

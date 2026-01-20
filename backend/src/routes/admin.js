@@ -409,5 +409,42 @@ router.delete('/names/:id', async (req, res) => {
     }
 });
 
+/**
+ * POST /api/admin/names/bulk
+ * Bulk add names from file upload
+ * Body: { names: string[] | { name: string, gender: string }[], gender?: string }
+ */
+router.post('/names/bulk', async (req, res) => {
+    try {
+        const { names, gender } = req.body;
+
+        if (!names || !Array.isArray(names) || names.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Names array is required',
+            });
+        }
+
+        // If gender is provided, apply it to all names
+        const namesWithGender = gender
+            ? names.map(n => ({ name: typeof n === 'string' ? n : n.name, gender }))
+            : names;
+
+        const result = await namesService.addBulkNames(namesWithGender);
+
+        res.status(201).json({
+            success: true,
+            message: `Added ${result.added.length} names`,
+            data: result,
+        });
+    } catch (error) {
+        console.error('Error bulk adding names:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to bulk add names',
+        });
+    }
+});
+
 export default router;
 
