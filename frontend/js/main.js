@@ -285,14 +285,67 @@ function showEmailModal(email) {
     elements.modalTo.textContent = email.to;
     elements.modalDate.textContent = new Date(email.receivedAt).toLocaleString('id-ID');
 
-    // Prefer text body, fallback to HTML
-    if (email.bodyText) {
-        elements.modalBody.textContent = email.bodyText;
-    } else if (email.bodyHtml) {
-        // Sanitize HTML (basic)
-        const temp = document.createElement('div');
-        temp.innerHTML = email.bodyHtml;
-        elements.modalBody.textContent = temp.textContent || temp.innerText;
+    // Clear previous content
+    elements.modalBody.innerHTML = '';
+
+    // Prefer HTML body for rich content, fallback to text
+    if (email.bodyHtml) {
+        // Create sandboxed iframe for HTML content
+        const iframe = document.createElement('iframe');
+        iframe.className = 'email-iframe';
+        iframe.sandbox = 'allow-same-origin';
+        iframe.style.width = '100%';
+        iframe.style.border = 'none';
+        iframe.style.minHeight = '300px';
+
+        elements.modalBody.appendChild(iframe);
+
+        // Write HTML content to iframe
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.open();
+        doc.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <base target="_blank">
+                <style>
+                    body { 
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        padding: 10px;
+                        margin: 0;
+                        font-size: 14px;
+                        line-height: 1.5;
+                        color: #333;
+                        background: #fff;
+                    }
+                    img { max-width: 100%; height: auto; }
+                    a { color: #0066cc; }
+                </style>
+            </head>
+            <body>${email.bodyHtml}</body>
+            </html>
+        `);
+        doc.close();
+
+        // Auto-resize iframe to content height
+        iframe.onload = () => {
+            try {
+                const height = iframe.contentDocument.body.scrollHeight;
+                iframe.style.height = Math.min(height + 20, 500) + 'px';
+            } catch (e) {
+                iframe.style.height = '400px';
+            }
+        };
+    } else if (email.bodyText) {
+        // Display plain text with proper formatting
+        const pre = document.createElement('pre');
+        pre.className = 'email-text';
+        pre.style.whiteSpace = 'pre-wrap';
+        pre.style.wordWrap = 'break-word';
+        pre.style.fontFamily = 'inherit';
+        pre.style.margin = '0';
+        pre.textContent = email.bodyText;
+        elements.modalBody.appendChild(pre);
     } else {
         elements.modalBody.textContent = '(No content)';
     }
