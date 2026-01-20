@@ -145,6 +145,11 @@ h3 {
   color: var(--color-white);
 }
 
+.btn--purple {
+  background: var(--color-purple);
+  color: var(--color-black);
+}
+
 .btn--small {
   padding: 0.5rem 1rem;
   font-size: 0.875rem;

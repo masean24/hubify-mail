@@ -30,6 +30,14 @@ const elements = {
     addDomainForm: document.getElementById('add-domain-form'),
     newDomainInput: document.getElementById('new-domain'),
     toastContainer: document.getElementById('toast-container'),
+    // Names management
+    namesTable: document.getElementById('names-table'),
+    btnAddName: document.getElementById('btn-add-name'),
+    nameModal: document.getElementById('name-modal'),
+    nameModalClose: document.getElementById('name-modal-close'),
+    addNameForm: document.getElementById('add-name-form'),
+    newNameInput: document.getElementById('new-name'),
+    newNameGender: document.getElementById('new-name-gender'),
 };
 
 // Utils
@@ -302,12 +310,142 @@ function escapeHtml(text) {
 function loadDashboardData() {
     fetchStats();
     fetchDomains();
+    fetchNames();
     fetchRecentEmails();
+}
+
+// ============================
+// NAMES MANAGEMENT FUNCTIONS
+// ============================
+
+async function fetchNames() {
+    try {
+        const res = await fetch(`${API_BASE}/admin/names`, {
+            headers: getAuthHeaders(),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            renderNamesTable(data.data);
+        }
+    } catch (error) {
+        console.error('Error fetching names:', error);
+    }
+}
+
+async function addName(name, gender) {
+    try {
+        const res = await fetch(`${API_BASE}/admin/names`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ name, gender }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showToast('Name added!', 'success');
+            hideNameModal();
+            fetchNames();
+        } else {
+            showToast(data.error || 'Failed to add name', 'error');
+        }
+    } catch (error) {
+        console.error('Error adding name:', error);
+        showToast('Failed to add name', 'error');
+    }
+}
+
+async function toggleName(id, isActive) {
+    try {
+        const res = await fetch(`${API_BASE}/admin/names/${id}`, {
+            method: 'PATCH',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ is_active: isActive }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showToast(`Name ${isActive ? 'enabled' : 'disabled'}!`, 'success');
+            fetchNames();
+        } else {
+            showToast(data.error || 'Failed to update name', 'error');
+        }
+    } catch (error) {
+        console.error('Error updating name:', error);
+        showToast('Failed to update name', 'error');
+    }
+}
+
+async function deleteName(id) {
+    if (!confirm('Are you sure you want to delete this name?')) return;
+
+    try {
+        const res = await fetch(`${API_BASE}/admin/names/${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders(),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showToast('Name deleted!', 'success');
+            fetchNames();
+        } else {
+            showToast(data.error || 'Failed to delete name', 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting name:', error);
+        showToast('Failed to delete name', 'error');
+    }
+}
+
+function renderNamesTable(names) {
+    if (names.length === 0) {
+        elements.namesTable.innerHTML = `
+      <tr><td colspan="5" style="text-align: center;">No names yet. Add some!</td></tr>
+    `;
+        return;
+    }
+
+    elements.namesTable.innerHTML = names
+        .map(
+            (n) => `
+      <tr>
+        <td><strong>${escapeHtml(n.name)}</strong></td>
+        <td>${escapeHtml(n.gender)}</td>
+        <td>
+          <span class="badge ${n.is_active ? 'badge--success' : 'badge--danger'}">
+            ${n.is_active ? 'Active' : 'Inactive'}
+          </span>
+        </td>
+        <td>${formatDate(n.created_at)}</td>
+        <td>
+          <button class="btn btn--small ${n.is_active ? 'btn--yellow' : 'btn--green'}" onclick="toggleName(${n.id}, ${!n.is_active})">
+            ${n.is_active ? 'Disable' : 'Enable'}
+          </button>
+          <button class="btn btn--small btn--red" onclick="deleteName(${n.id})">Delete</button>
+        </td>
+      </tr>
+    `
+        )
+        .join('');
+}
+
+function showNameModal() {
+    elements.nameModal.classList.add('active');
+    elements.newNameInput.value = '';
+    elements.newNameGender.value = 'neutral';
+    elements.newNameInput.focus();
+}
+
+function hideNameModal() {
+    elements.nameModal.classList.remove('active');
 }
 
 // Make functions available globally for inline handlers
 window.toggleDomain = toggleDomain;
 window.deleteDomain = deleteDomain;
+window.toggleName = toggleName;
+window.deleteName = deleteName;
 
 // Event Listeners
 elements.loginForm.addEventListener('submit', (e) => {
@@ -353,6 +491,27 @@ elements.btnCleanup.addEventListener('click', () => {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         hideDomainModal();
+        hideNameModal();
+    }
+});
+
+// Names event listeners
+elements.btnAddName.addEventListener('click', showNameModal);
+
+elements.nameModalClose.addEventListener('click', hideNameModal);
+
+elements.nameModal.addEventListener('click', (e) => {
+    if (e.target === elements.nameModal) {
+        hideNameModal();
+    }
+});
+
+elements.addNameForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = elements.newNameInput.value.trim();
+    const gender = elements.newNameGender.value;
+    if (name) {
+        addName(name, gender);
     }
 });
 

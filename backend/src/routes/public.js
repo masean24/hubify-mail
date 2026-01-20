@@ -50,10 +50,13 @@ router.post('/inbox/generate', async (req, res) => {
             });
         }
 
-        // Generate random local part using human name
-        const randomName = await namesService.getRandomName();
-        const randomNum = Math.floor(Math.random() * 9000) + 1000; // 4-digit number
-        const localPart = randomName ? `${randomName}${randomNum}` : inboxService.generateRandomLocalPart();
+        // Generate random local part using two human names (firstname + lastname) + 2 digits
+        const firstName = await namesService.getRandomName();
+        const lastName = await namesService.getRandomName();
+        const randomNum = Math.floor(Math.random() * 90) + 10; // 2-digit number (10-99)
+        const localPart = (firstName && lastName)
+            ? `${firstName}${lastName}${randomNum}`
+            : inboxService.generateRandomLocalPart();
 
         // Create inbox
         const inbox = await inboxService.getOrCreateInbox(localPart, domainId);
