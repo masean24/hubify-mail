@@ -1,0 +1,286 @@
+import { Router } from 'express';
+import { authMiddleware, generateToken } from '../middleware/auth.js';
+import adminService from '../services/admin.js';
+import domainService from '../services/domain.js';
+import inboxService from '../services/inbox.js';
+import cleanupService from '../services/cleanup.js';
+
+const router = Router();
+
+/**
+ * POST /api/admin/login
+ * Admin login
+ */
+router.post('/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        if (!username || !password) {
+            return res.status(400).json({
+                success: false,
+                error: 'Username and password are required',
+            });
+        }
+
+        const admin = await adminService.getAdminByUsername(username);
+
+        if (!admin) {
+            return res.status(401).json({
+                success: false,
+                error: 'Invalid credentials',
+            });
+        }
+
+        const isValid = await adminService.verifyPassword(password, admin.password_hash);
+
+        if (!isValid) {
+            return res.status(401).json({
+                success: false,
+                error: 'Invalid credentials',
+            });
+        }
+
+        const token = generateToken({
+            id: admin.id,
+            username: admin.username,
+        });
+
+        res.json({
+            success: true,
+            data: {
+                token,
+                username: admin.username,
+            },
+        });
+    } catch (error) {
+        console.error('Error during login:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Login failed',
+        });
+    }
+});
+
+// Protected routes below
+router.use(authMiddleware);
+
+/**
+ * GET /api/admin/stats
+ * Get dashboard statistics
+ */
+router.get('/stats', async (req, res) => {
+    try {
+        const [
+            totalEmailsToday,
+            totalEmailsAll,
+            activeInboxes,
+            emailsPerDomain,
+            cleanupStats,
+        ] = await Promise.all([
+            inboxService.countEmails({ today: true }),
+            inboxService.countEmails(),
+            inboxService.countActiveInboxes(),
+            inboxService.getEmailsPerDomain(),
+            cleanupService.getCleanupStats(),
+        ]);
+
+        res.json({
+            success: true,
+            data: {
+                totalEmailsToday,
+                totalEmailsAll,
+                activeInboxes,
+                emailsPerDomain,
+                expiredInboxes: cleanupStats.expiredInboxes,
+            },
+        });
+    } catch (error) {
+        console.error('Error fetching stats:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch statistics',
+        });
+    }
+});
+
+/**
+ * GET /api/admin/domains
+ * Get all domains
+ */
+router.get('/domains', async (req, res) => {
+    try {
+        const domains = await domainService.getAllDomains();
+        res.json({
+            success: true,
+            data: domains,
+        });
+    } catch (error) {
+        console.error('Error fetching domains:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch domains',
+        });
+    }
+});
+
+/**
+ * POST /api/admin/domains
+ * Add new domain
+ */
+router.post('/domains', async (req, res) => {
+    try {
+        const { domain } = req.body;
+
+        if (!domain) {
+            return res.status(400).json({
+                success: false,
+                error: 'Domain is required',
+            });
+        }
+
+        // Validate domain format
+        if (!/^[a-zA-Z0-9][a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(domain)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid domain format',
+            });
+        }
+
+        // Check if domain already exists
+        const existing = await domainService.getDomainByName(domain);
+        if (existing) {
+            return res.status(400).json({
+                success: false,
+                error: 'Domain already exists',
+            });
+        }
+
+        const newDomain = await domainService.createDomain(domain);
+
+        res.status(201).json({
+            success: true,
+            data: newDomain,
+        });
+    } catch (error) {
+        console.error('Error creating domain:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to create domain',
+        });
+    }
+});
+
+/**
+ * PATCH /api/admin/domains/:id
+ * Update domain
+ */
+router.patch('/domains/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { domain, is_active } = req.body;
+
+        const existing = await domainService.getDomainById(id);
+        if (!existing) {
+            return res.status(404).json({
+                success: false,
+                error: 'Domain not found',
+            });
+        }
+
+        const updated = await domainService.updateDomain(id, { domain, is_active });
+
+        res.json({
+            success: true,
+            data: updated,
+        });
+    } catch (error) {
+        console.error('Error updating domain:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to update domain',
+        });
+    }
+});
+
+/**
+ * DELETE /api/admin/domains/:id
+ * Delete domain
+ */
+router.delete('/domains/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const existing = await domainService.getDomainById(id);
+        if (!existing) {
+            return res.status(404).json({
+                success: false,
+                error: 'Domain not found',
+            });
+        }
+
+        await domainService.deleteDomain(id);
+
+        res.json({
+            success: true,
+            message: 'Domain deleted successfully',
+        });
+    } catch (error) {
+        console.error('Error deleting domain:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to delete domain',
+        });
+    }
+});
+
+/**
+ * GET /api/admin/emails/recent
+ * Get recent emails
+ */
+router.get('/emails/recent', async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 50;
+        const emails = await inboxService.getRecentEmails(limit);
+
+        res.json({
+            success: true,
+            data: emails.map((e) => ({
+                id: e.id,
+                to: `${e.local_part}@${e.domain}`,
+                from: e.from_address,
+                subject: e.subject,
+                receivedAt: e.received_at,
+            })),
+        });
+    } catch (error) {
+        console.error('Error fetching recent emails:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch recent emails',
+        });
+    }
+});
+
+/**
+ * POST /api/admin/cleanup
+ * Trigger manual cleanup
+ */
+router.post('/cleanup', async (req, res) => {
+    try {
+        const deletedCount = await cleanupService.cleanupExpiredInboxes();
+
+        res.json({
+            success: true,
+            message: `Cleanup completed. Deleted ${deletedCount} expired inboxes.`,
+            deletedCount,
+        });
+    } catch (error) {
+        console.error('Error during cleanup:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Cleanup failed',
+        });
+    }
+});
+
+export default router;

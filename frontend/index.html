@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hubify ID - Free temporary email service. Get instant disposable email addresses for verification and privacy.">
+  <title>Hubify ID - Temporary Email</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/brutalism.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header__inner">
+      <a href="/" class="header__logo">
+        <span>Hubify</span> ID
+      </a>
+      <a href="/admin.html" class="btn btn--small btn--yellow">Admin</a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- TTL Indicator -->
+    <div class="ttl" id="ttl-indicator">
+      <span class="ttl__icon">⏱️</span>
+      <span id="ttl-text">Email aktif selama 24 jam</span>
+    </div>
+
+    <!-- Email Generator -->
+    <section class="email-generator brutal-box brutal-box--yellow">
+      <h1 class="email-generator__title">📧 Your Temporary Email Address</h1>
+      
+      <div class="email-generator__box">
+        <input 
+          type="text" 
+          class="input email-generator__input" 
+          id="email-display" 
+          readonly 
+          value="Loading..."
+        >
+        <button class="btn btn--green btn--icon" id="btn-copy" title="Copy Email">
+          📋
+        </button>
+      </div>
+
+      <div class="email-generator__actions">
+        <button class="btn" id="btn-refresh">
+          🔄 Refresh
+        </button>
+        <button class="btn btn--blue" id="btn-new">
+          ✨ New
+        </button>
+        <button class="btn btn--red" id="btn-delete">
+          🗑️ Delete
+        </button>
+      </div>
+    </section>
+
+    <!-- Custom Email -->
+    <section class="custom-email brutal-box">
+      <h2 class="custom-email__title">🔧 Or Use Custom Email</h2>
+      <form class="custom-email__form" id="custom-form">
+        <input 
+          type="text" 
+          class="input custom-email__input" 
+          id="custom-local" 
+          placeholder="username"
+          pattern="[a-zA-Z0-9._-]+"
+        >
+        <span class="custom-email__at">@</span>
+        <select class="select" id="custom-domain"></select>
+        <button type="submit" class="btn btn--green">Use</button>
+      </form>
+    </section>
+
+    <!-- Inbox -->
+    <section class="inbox brutal-box">
+      <div class="inbox__header">
+        <h2 class="inbox__title">📬 Inbox</h2>
+        <div class="inbox__status">
+          <div class="inbox__status-dot"></div>
+          <span>Auto-refresh</span>
+        </div>
+      </div>
+
+      <div id="inbox-content">
+        <div class="inbox__empty">
+          <div class="inbox__empty-icon">📭</div>
+          <p class="inbox__empty-text">No Messages</p>
+          <p class="inbox__empty-sub">Waiting for incoming messages...</p>
+        </div>
+      </div>
+
+      <ul class="email-list hidden" id="email-list"></ul>
+    </section>
+  </main>
+
+  <!-- Email Modal -->
+  <div class="modal" id="email-modal">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h3 class="modal__title" id="modal-subject">Subject</h3>
+        <button class="modal__close" id="modal-close">✕</button>
+      </div>
+      <div class="modal__meta">
+        <p><strong>From:</strong> <span id="modal-from"></span></p>
+        <p><strong>To:</strong> <span id="modal-to"></span></p>
+        <p><strong>Date:</strong> <span id="modal-date"></span></p>
+      </div>
+      <div class="modal__body">
+        <div class="modal__body-text" id="modal-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2024 Hubify ID. Free temporary email service.</p>
+  </footer>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
