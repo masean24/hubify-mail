@@ -3,19 +3,25 @@
  * Postfix Pipe Handler
  * This script receives raw email from Postfix via stdin
  * and inserts it into the database
+ * 
+ * IMPORTANT: dotenv must be loaded BEFORE any other imports
+ * because database.js reads process.env.DATABASE_URL on import
  */
 
-import { parseEmail } from '../services/emailParser.js';
-import inboxService from '../services/inbox.js';
-import domainService from '../services/domain.js';
-import db from '../config/database.js';
+// Load environment variables FIRST
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
-// Load .env from backend root
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 dotenv.config({ path: join(__dirname, '../../.env') });
+
+// Now import other modules (after dotenv is loaded)
+import { parseEmail } from '../services/emailParser.js';
+import inboxService from '../services/inbox.js';
+import domainService from '../services/domain.js';
+import db from '../config/database.js';
 
 /**
  * Read stdin as buffer
