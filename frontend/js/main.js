@@ -11,6 +11,68 @@ let currentDomains = [];
 let pollInterval = null;
 let lastRefreshTime = null;
 let refreshCounterInterval = null;
+let lastEmailCount = 0;
+let notificationEnabled = localStorage.getItem('hubify_notification') !== 'false';
+let audioContext = null;
+
+// Initialize Audio Context (for notification sound)
+function getAudioContext() {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioContext;
+}
+
+// Play notification sound using Web Audio API
+function playNotificationSound() {
+    try {
+        const ctx = getAudioContext();
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        // Pleasant "ding" sound
+        oscillator.frequency.setValueAtTime(880, ctx.currentTime); // A5 note
+        oscillator.frequency.setValueAtTime(1100, ctx.currentTime + 0.1); // Higher pitch
+        oscillator.type = 'sine';
+
+        gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.5);
+    } catch (e) {
+        console.log('Audio not supported');
+    }
+}
+
+// Show browser notification
+async function showBrowserNotification(title, body) {
+    if (!('Notification' in window)) return;
+
+    if (Notification.permission === 'granted') {
+        new Notification(title, {
+            body,
+            icon: '/favicon.ico',
+            tag: 'hubify-email'
+        });
+    } else if (Notification.permission !== 'denied') {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            new Notification(title, { body, icon: '/favicon.ico' });
+        }
+    }
+}
+
+// Notify new email
+function notifyNewEmail(email) {
+    if (!notificationEnabled) return;
+
+    playNotificationSound();
+    showBrowserNotification('📧 New Email!', `From: ${email.from}\n${email.subject}`);
+}
 
 // DOM Elements
 const elements = {
@@ -19,6 +81,7 @@ const elements = {
     btnRefresh: document.getElementById('btn-refresh'),
     btnNew: document.getElementById('btn-new'),
     btnDelete: document.getElementById('btn-delete'),
+    btnNotification: document.getElementById('btn-notification'),
     customForm: document.getElementById('custom-form'),
     customLocal: document.getElementById('custom-local'),
     customDomain: document.getElementById('custom-domain'),
@@ -173,7 +236,16 @@ async function fetchInbox() {
         const data = await res.json();
 
         if (data.success) {
-            renderInbox(data.data.emails);
+            const emails = data.data.emails;
+
+            // Check for new emails (only notify if count increased and not first load)
+            if (lastEmailCount > 0 && emails.length > lastEmailCount) {
+                const newEmail = emails[0]; // Most recent email
+                notifyNewEmail(newEmail);
+            }
+            lastEmailCount = emails.length;
+
+            renderInbox(emails);
             if (data.data.expiresAt) {
                 elements.ttlText.textContent = formatTTL(data.data.expiresAt);
             }
@@ -380,6 +452,30 @@ function copyToClipboard(text) {
     });
 }
 
+// Notification toggle
+function toggleNotification() {
+    notificationEnabled = !notificationEnabled;
+    localStorage.setItem('hubify_notification', notificationEnabled);
+    updateNotificationButton();
+
+    if (notificationEnabled) {
+        // Request permission when enabling
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+        showToast('Notifications enabled!', 'success');
+    } else {
+        showToast('Notifications disabled', 'success');
+    }
+}
+
+function updateNotificationButton() {
+    if (elements.btnNotification) {
+        elements.btnNotification.textContent = notificationEnabled ? '🔔' : '🔕';
+        elements.btnNotification.title = notificationEnabled ? 'Notifications ON (click to disable)' : 'Notifications OFF (click to enable)';
+    }
+}
+
 // Polling
 function startPolling() {
     if (pollInterval) clearInterval(pollInterval);
@@ -421,6 +517,8 @@ elements.btnDelete.addEventListener('click', () => {
     }
 });
 
+elements.btnNotification.addEventListener('click', toggleNotification);
+
 elements.customForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const localPart = elements.customLocal.value.trim();
@@ -457,6 +555,9 @@ document.addEventListener('keydown', (e) => {
 // Initialize
 async function init() {
     await fetchDomains();
+
+    // Initialize notification button state
+    updateNotificationButton();
 
     // Check for saved email
     const savedEmail = localStorage.getItem('hubify_email');
