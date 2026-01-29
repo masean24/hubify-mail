@@ -4,12 +4,13 @@ export default defineConfig({
     root: '.',
     build: {
         outDir: 'dist',
-        rollupOptions: {
-            input: {
-                main: './index.html',
-                admin: './admin.html',
-            },
+rollupOptions: {
+        input: {
+            main: './index.html',
+            admin: './admin.html',
+            otp: './otp.html',
         },
+    },
     },
     server: {
         port: 5173,

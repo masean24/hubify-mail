@@ -10,7 +10,34 @@ Panduan lengkap untuk menambah dan mengelola domain di Hubify Mail.
 3. Masukkan nama domain baru (contoh: `temp.hubify.store`)
 4. Klik **Add Domain**
 
-### 2. Update Postfix Configuration
+### 2. Postfix: Langsung Aktif (pilih salah satu)
+
+#### Opsi A: Otomatis dari Web (disarankan)
+Agar domain langsung aktif tanpa edit config di VPS, aktifkan Postfix sync sekali saja:
+
+1. **Buat script executable** (di VPS):
+```bash
+chmod +x /var/www/hubify-mail/backend/scripts/sync-postfix.sh
+```
+
+2. **Izinkan user proses API jalankan script dengan sudo** (ganti path jika beda):
+```bash
+sudo visudo
+```
+Tambahkan baris (ganti `www-data` jika proses API pakai user lain):
+```
+www-data ALL=(ALL) NOPASSWD: /var/www/hubify-mail/backend/scripts/sync-postfix.sh
+```
+
+3. **Aktifkan di `.env` backend**:
+```
+POSTFIX_SYNC_ENABLED=true
+```
+Lalu restart API: `pm2 restart hubify-api`
+
+Setelah itu, setiap kali kamu tambah/ubah/hapus domain dari Admin Dashboard, Postfix akan otomatis di-update dan reload. Jika sync gagal (misal sudo belum di-set), response API tetap sukses dan akan ada `postfixSyncWarning`; domain di database sudah tersimpan, tinggal update `virtual_mailbox_domains` manual sekali.
+
+#### Opsi B: Manual (edit config di VPS)
 ```bash
 sudo nano /etc/postfix/main.cf
 ```
@@ -20,7 +47,7 @@ Cari baris `virtual_mailbox_domains` dan tambahkan domain baru:
 virtual_mailbox_domains = hubify.store, newdomain.com, anotherdomain.com
 ```
 
-Reload Postfix:
+Lalu:
 ```bash
 sudo postfix reload
 ```

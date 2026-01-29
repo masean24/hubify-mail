@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="OTP Finder - Cari kode OTP dari email temporary Anda.">
+  <title>OTP Finder - Hubify Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/otp.css">
+</head>
+
+<body class="otp-page">
+  <header class="otp-header">
+    <div class="otp-header__inner">
+      <a href="/" class="otp-header__logo" title="Kembali ke halaman utama">
+        <span class="otp-header__logo-icon">✉</span>
+        <span>OTP Finder</span>
+      </a>
+      <a href="/" class="otp-header__home" title="Halaman utama">Halaman Utama</a>
+    </div>
+  </header>
+
+  <main class="otp-main">
+    <div class="otp-card">
+      <label class="otp-card__label" for="email-input">Masukkan Email</label>
+      <input
+        type="text"
+        id="email-input"
+        class="otp-card__input"
+        placeholder="email@example.com"
+        autocomplete="email"
+      >
+      <button type="button" class="otp-card__btn" id="btn-search">
+        <svg class="otp-card__btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        Cari OTP
+      </button>
+
+      <div class="otp-card__info" role="status">
+        <svg class="otp-card__info-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
+        </svg>
+        <p>Jika OTP tidak ditemukan tunggu 30-60 detik lalu klik Cari OTP lagi.</p>
+      </div>
+    </div>
+
+    <div class="otp-result hidden" id="otp-result">
+      <div class="otp-result__header">
+        <h2 class="otp-result__title">Hasil</h2>
+        <p class="otp-result__email" id="result-email"></p>
+      </div>
+      <div class="otp-result__loading hidden" id="result-loading">Memuat...</div>
+      <ul class="otp-result__list" id="result-list"></ul>
+      <div class="otp-result__empty hidden" id="result-empty">
+        <p>Belum ada email atau tidak ada kode OTP yang terdeteksi.</p>
+        <p class="otp-result__empty-hint">Tunggu 30-60 detik lalu klik Cari OTP lagi.</p>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="./js/otp.js"></script>
+</body>
+
+</html>

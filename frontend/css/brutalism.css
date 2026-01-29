@@ -232,6 +232,19 @@ h3 {
   color: var(--color-yellow);
 }
 
+.header__link {
+  color: var(--color-white);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.header__link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
 /* Main Content */
 .main {
   max-width: 800px;
@@ -604,6 +617,11 @@ h3 {
 
 .toast--error {
   background: var(--color-red);
+}
+
+.toast--warning {
+  background: var(--color-orange);
+  color: var(--color-black);
 }
 
 @keyframes slideIn {

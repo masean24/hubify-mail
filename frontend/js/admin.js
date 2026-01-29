@@ -170,6 +170,7 @@ async function addDomain(domain) {
 
         if (data.success) {
             showToast('Domain added!', 'success');
+            if (data.postfixSyncWarning) showToast(data.postfixSyncWarning, 'warning');
             hideDomainModal();
             fetchDomains();
         } else {
@@ -192,6 +193,7 @@ async function toggleDomain(id, isActive) {
 
         if (data.success) {
             showToast(`Domain ${isActive ? 'enabled' : 'disabled'}!`, 'success');
+            if (data.postfixSyncWarning) showToast(data.postfixSyncWarning, 'warning');
             fetchDomains();
         } else {
             showToast(data.error || 'Failed to update domain', 'error');
@@ -214,6 +216,7 @@ async function deleteDomain(id) {
 
         if (data.success) {
             showToast('Domain deleted!', 'success');
+            if (data.postfixSyncWarning) showToast(data.postfixSyncWarning, 'warning');
             fetchDomains();
         } else {
             showToast(data.error || 'Failed to delete domain', 'error');

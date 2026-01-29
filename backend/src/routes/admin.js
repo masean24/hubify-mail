@@ -5,6 +5,7 @@ import domainService from '../services/domain.js';
 import inboxService from '../services/inbox.js';
 import cleanupService from '../services/cleanup.js';
 import namesService from '../services/names.js';
+import postfixSync from '../services/postfixSync.js';
 
 const router = Router();
 
@@ -158,10 +159,13 @@ router.post('/domains', async (req, res) => {
 
         const newDomain = await domainService.createDomain(domain);
 
-        res.status(201).json({
-            success: true,
-            data: newDomain,
-        });
+        const syncResult = await postfixSync.syncPostfix();
+        const payload = { success: true, data: newDomain };
+        if (!syncResult.success && !syncResult.skipped) {
+            payload.postfixSyncWarning = syncResult.error || 'Postfix config was not updated. Update virtual_mailbox_domains on the VPS manually.';
+        }
+
+        res.status(201).json(payload);
     } catch (error) {
         console.error('Error creating domain:', error);
         res.status(500).json({
@@ -190,10 +194,13 @@ router.patch('/domains/:id', async (req, res) => {
 
         const updated = await domainService.updateDomain(id, { domain, is_active });
 
-        res.json({
-            success: true,
-            data: updated,
-        });
+        const syncResult = await postfixSync.syncPostfix();
+        const payload = { success: true, data: updated };
+        if (!syncResult.success && !syncResult.skipped) {
+            payload.postfixSyncWarning = syncResult.error || 'Postfix config was not updated. Update virtual_mailbox_domains on the VPS manually.';
+        }
+
+        res.json(payload);
     } catch (error) {
         console.error('Error updating domain:', error);
         res.status(500).json({
@@ -221,10 +228,13 @@ router.delete('/domains/:id', async (req, res) => {
 
         await domainService.deleteDomain(id);
 
-        res.json({
-            success: true,
-            message: 'Domain deleted successfully',
-        });
+        const syncResult = await postfixSync.syncPostfix();
+        const payload = { success: true, message: 'Domain deleted successfully' };
+        if (!syncResult.success && !syncResult.skipped) {
+            payload.postfixSyncWarning = syncResult.error || 'Postfix config was not updated. Update virtual_mailbox_domains on the VPS manually.';
+        }
+
+        res.json(payload);
     } catch (error) {
         console.error('Error deleting domain:', error);
         res.status(500).json({

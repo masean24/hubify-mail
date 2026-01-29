@@ -2,6 +2,7 @@ import { Router } from 'express';
 import domainService from '../services/domain.js';
 import inboxService from '../services/inbox.js';
 import namesService from '../services/names.js';
+import otpExtract from '../services/otpExtract.js';
 
 const router = Router();
 
@@ -132,6 +133,62 @@ router.post('/inbox/custom', async (req, res) => {
         res.status(500).json({
             success: false,
             error: 'Failed to create email address',
+        });
+    }
+});
+
+/**
+ * GET /api/otp/:address
+ * Get inbox emails with extracted OTP codes (for OTP Finder page)
+ */
+router.get('/otp/:address', async (req, res) => {
+    try {
+        const { address } = req.params;
+
+        if (!address.includes('@')) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid email address format',
+            });
+        }
+
+        const inbox = await inboxService.getInboxByAddress(address);
+
+        if (!inbox) {
+            return res.json({
+                success: true,
+                data: {
+                    email: address,
+                    items: [],
+                },
+            });
+        }
+
+        const emails = await inboxService.getInboxEmails(inbox.id);
+
+        const items = emails.map((e) => {
+            const otp = otpExtract.extractOtp(e.body_text, e.body_html);
+            return {
+                id: e.id,
+                from: e.from_address,
+                subject: e.subject,
+                receivedAt: e.received_at,
+                otp: otp || null,
+            };
+        });
+
+        res.json({
+            success: true,
+            data: {
+                email: address,
+                items,
+            },
+        });
+    } catch (error) {
+        console.error('Error fetching OTP:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch OTP',
         });
     }
 });
