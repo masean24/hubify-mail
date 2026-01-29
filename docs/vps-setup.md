@@ -225,16 +225,58 @@ Open: `https://mail.hubify.store`
 cd /var/www/hubify-mail
 git pull
 
-# If schema changed
-psql -U hubify -d hubify_mail -f sql/add-names-table.sql
+# If schema changed (biasanya tidak perlu)
+# psql -U hubify -d hubify_mail -f sql/add-names-table.sql
 
 # Rebuild frontend
 cd frontend
+npm install
 npm run build
 
 # Restart API
+cd /var/www/hubify-mail/backend
 pm2 restart hubify-api
 ```
+
+---
+
+## Domain Langsung Aktif dari Web (Postfix Sync)
+
+Agar domain yang kamu tambah dari Admin Dashboard langsung terdeteksi Postfix (tanpa edit `main.cf` manual), lakukan sekali di VPS:
+
+**1. Update kode dulu** (lihat "Updating the Application" di atas).
+
+**2. Script executable:**
+```bash
+chmod +x /var/www/hubify-mail/backend/scripts/sync-postfix.sh
+```
+
+**3. Izinkan user API jalankan script dengan sudo:**
+```bash
+sudo visudo
+```
+Tambahkan satu baris (ganti `www-data` jika PM2/API pakai user lain):
+```
+www-data ALL=(ALL) NOPASSWD: /var/www/hubify-mail/backend/scripts/sync-postfix.sh
+```
+Simpan (Ctrl+O, Enter, Ctrl+X di nano).
+
+**4. Aktifkan di `.env` backend:**
+```bash
+sudo nano /var/www/hubify-mail/backend/.env
+```
+Tambahkan:
+```
+POSTFIX_SYNC_ENABLED=true
+```
+Simpan.
+
+**5. Restart API:**
+```bash
+pm2 restart hubify-api
+```
+
+Setelah itu, tambah/ubah/hapus domain dari web → Postfix otomatis di-update dan domain langsung aktif. Detail lengkap: [docs/domain-guide.md](domain-guide.md).
 
 ---
 

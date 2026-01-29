@@ -9,51 +9,69 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/brutalism.css">
   <link rel="stylesheet" href="./css/otp.css">
 </head>
 
-<body class="otp-page">
-  <header class="otp-header">
-    <div class="otp-header__inner">
-      <a href="/" class="otp-header__logo" title="Kembali ke halaman utama">
-        <span class="otp-header__logo-icon">✉</span>
-        <span>OTP Finder</span>
+<body>
+  <header class="header">
+    <div class="header__inner">
+      <a href="/" class="header__logo">
+        <span>HUBIFY</span>.STORE
       </a>
-      <a href="/" class="otp-header__home" title="Halaman utama">Halaman Utama</a>
+      <a href="/" class="header__link">Halaman Utama</a>
     </div>
   </header>
 
-  <main class="otp-main">
-    <div class="otp-card">
+  <main class="main otp-main">
+    <section class="brutal-box brutal-box--yellow otp-card">
+      <div class="otp-card__header">
+        <div class="icon-box icon-box--pink">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </div>
+        <h1 class="otp-card__title">OTP FINDER</h1>
+      </div>
       <label class="otp-card__label" for="email-input">Masukkan Email</label>
       <input
         type="text"
         id="email-input"
-        class="otp-card__input"
+        class="input otp-card__input"
         placeholder="email@example.com"
         autocomplete="email"
       >
-      <button type="button" class="otp-card__btn" id="btn-search">
-        <svg class="otp-card__btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <button type="button" class="btn btn--green otp-card__btn" id="btn-search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8" />
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
         Cari OTP
       </button>
-
-      <div class="otp-card__info" role="status">
-        <svg class="otp-card__info-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="16" x2="12" y2="12" />
-          <line x1="12" y1="8" x2="12.01" y2="8" />
-        </svg>
+      <div class="otp-card__info brutal-box" role="status">
+        <div class="icon-box icon-box--cyan">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+        </div>
         <p>Jika OTP tidak ditemukan tunggu 30-60 detik lalu klik Cari OTP lagi.</p>
       </div>
-    </div>
+    </section>
 
-    <div class="otp-result hidden" id="otp-result">
+    <section class="brutal-box otp-result hidden" id="otp-result">
       <div class="otp-result__header">
-        <h2 class="otp-result__title">Hasil</h2>
+        <div class="icon-box icon-box--orange">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14,2 14,8 20,8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+          </svg>
+        </div>
+        <h2 class="otp-result__title">HASIL</h2>
         <p class="otp-result__email" id="result-email"></p>
       </div>
       <div class="otp-result__loading hidden" id="result-loading">Memuat...</div>
@@ -62,7 +80,7 @@
         <p>Belum ada email atau tidak ada kode OTP yang terdeteksi.</p>
         <p class="otp-result__empty-hint">Tunggu 30-60 detik lalu klik Cari OTP lagi.</p>
       </div>
-    </div>
+    </section>
   </main>
 
   <script type="module" src="./js/otp.js"></script>
