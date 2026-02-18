@@ -21,6 +21,7 @@ dotenv.config({ path: join(__dirname, '../../.env') });
 import { parseEmail } from '../services/emailParser.js';
 import inboxService from '../services/inbox.js';
 import domainService from '../services/domain.js';
+import discordService from '../services/discord.js';
 import db from '../config/database.js';
 
 /**
@@ -91,6 +92,10 @@ async function main() {
         });
 
         console.log(`✅ Email saved with ID: ${email.id}`);
+
+        // Send Discord webhook notification (await before exit)
+        await discordService.sendNewEmailNotification(parsed.to, parsed.from)
+            .catch(err => console.error('⚠️ Discord notify failed:', err.message));
 
         // Close database connection
         await db.end();

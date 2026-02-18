@@ -144,8 +144,14 @@ server {
     listen 80;
     server_name mail.hubify.store;
 
+    root /var/www/hubify-mail/frontend/dist;
+
+    # /admin (tanpa .html) → tampilkan halaman admin, bukan main page
+    location = /admin {
+        try_files /admin.html =404;
+    }
+
     location / {
-        root /var/www/hubify-mail/frontend/dist;
         try_files $uri $uri/ /index.html;
     }
 

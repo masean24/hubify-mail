@@ -161,6 +161,11 @@ function updateRefreshCounter() {
     }
 }
 
+const BASE_TITLE = 'Hubify Store - Temporary Email';
+function updateTitleBadge(count) {
+    document.title = count > 0 ? `(${count}) ${BASE_TITLE}` : BASE_TITLE;
+}
+
 // API Functions
 async function fetchDomains() {
     try {
@@ -183,7 +188,8 @@ async function generateEmail() {
     }
 
     try {
-        const domainId = currentDomains[0].id;
+        const randomDomain = currentDomains[Math.floor(Math.random() * currentDomains.length)];
+        const domainId = randomDomain.id;
         const gender = elements.genderSelect?.value || 'random';
         const res = await fetch(`${API_BASE}/inbox/generate`, {
             method: 'POST',
@@ -333,8 +339,11 @@ function renderInbox(emails) {
     if (!emails || emails.length === 0) {
         elements.inboxContent.classList.remove('hidden');
         elements.emailList.classList.add('hidden');
+        updateTitleBadge(0);
         return;
     }
+
+    updateTitleBadge(emails.length);
 
     elements.inboxContent.classList.add('hidden');
     elements.emailList.classList.remove('hidden');
