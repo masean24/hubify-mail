@@ -22,6 +22,8 @@ import { parseEmail } from '../services/emailParser.js';
 import inboxService from '../services/inbox.js';
 import domainService from '../services/domain.js';
 import discordService from '../services/discord.js';
+import telegramService from '../services/telegram.js';
+import otpExtract from '../services/otpExtract.js';
 import db from '../config/database.js';
 
 /**
@@ -93,9 +95,16 @@ async function main() {
 
         console.log(`✅ Email saved with ID: ${email.id}`);
 
+        // Extract OTP for notifications
+        const otp = otpExtract.extractOtp(parsed.text, parsed.html);
+
         // Send Discord webhook notification (await before exit)
         await discordService.sendNewEmailNotification(parsed.to, parsed.from)
             .catch(err => console.error('⚠️ Discord notify failed:', err.message));
+
+        // Send Telegram notification with OTP
+        await telegramService.notifyNewEmail(parsed.to, parsed.from, parsed.subject, otp)
+            .catch(err => console.error('⚠️ Telegram notify failed:', err.message));
 
         // Close database connection
         await db.end();

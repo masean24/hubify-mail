@@ -5,8 +5,10 @@ import cron from 'node-cron';
 
 import publicRoutes from './routes/public.js';
 import adminRoutes from './routes/admin.js';
+import externalRoutes from './routes/external.js';
 import rateLimit from './middleware/rateLimit.js';
 import cleanupService from './services/cleanup.js';
+import telegramService from './services/telegram.js';
 
 dotenv.config();
 
@@ -23,6 +25,7 @@ app.use('/api', rateLimit());
 // Routes
 app.use('/api', publicRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/ext', externalRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -70,6 +73,9 @@ app.listen(PORT, () => {
   ║                                               ║
   ╚═══════════════════════════════════════════════╝
   `);
+
+    // Start Telegram bot
+    telegramService.startBot();
 });
 
 export default app;
