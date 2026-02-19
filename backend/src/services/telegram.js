@@ -238,19 +238,16 @@ export async function startBot() {
 }
 
 /**
- * Send notification to owner when new email arrives.
+ * Send notification to a Telegram channel when new email arrives.
  * Uses direct Telegram API call (not bot instance) so it works
  * from email-handler.js which runs as a separate Postfix pipe process.
- * @param {string} toEmail - recipient address
- * @param {string} fromAddress - sender address
- * @param {string} subject - email subject
- * @param {string|null} otp - extracted OTP code (if any)
+ * Sends to TELEGRAM_CHANNEL_ID (dedicated channel for notifications).
  */
 export async function notifyNewEmail(toEmail, fromAddress, subject, otp) {
     const token = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_OWNER_ID;
+    const channelId = process.env.TELEGRAM_CHANNEL_ID;
 
-    if (!token || !chatId) return;
+    if (!token || !channelId) return;
 
     try {
         let msg = `📧 *Email Masuk*\n\n`;
@@ -266,13 +263,13 @@ export async function notifyNewEmail(toEmail, fromAddress, subject, otp) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                chat_id: chatId,
+                chat_id: channelId,
                 text: msg,
                 parse_mode: 'Markdown',
             }),
         });
     } catch (error) {
-        console.error('⚠️ Telegram notify failed:', error.message);
+        console.error('⚠️ Telegram channel notify failed:', error.message);
     }
 }
 
