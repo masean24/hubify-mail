@@ -198,7 +198,7 @@ router.get('/inbox/:address/otp', async (req, res) => {
 
         // Try to find OTP from most recent email first, then fallback to older ones
         for (const email of emails) {
-            const otp = otpExtract.extractOtp(email.body_text, email.body_html);
+            const otp = otpExtract.extractOtp(email.body_text, email.body_html, email.subject);
             if (otp) {
                 return res.json({
                     success: true,

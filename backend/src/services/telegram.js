@@ -184,7 +184,7 @@ export async function startBot() {
             const emails = await inboxService.getInboxEmails(inbox.id);
 
             for (const email of emails) {
-                const otp = otpExtract.extractOtp(email.body_text, email.body_html);
+                const otp = otpExtract.extractOtp(email.body_text, email.body_html, email.subject);
                 if (otp) {
                     const time = new Date(email.received_at).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
                     return ctx.reply(

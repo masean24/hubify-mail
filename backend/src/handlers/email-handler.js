@@ -96,7 +96,7 @@ async function main() {
         console.log(`✅ Email saved with ID: ${email.id}`);
 
         // Extract OTP for notifications
-        const otp = otpExtract.extractOtp(parsed.text, parsed.html);
+        const otp = otpExtract.extractOtp(parsed.text, parsed.html, parsed.subject);
 
         // Send Discord webhook notification (await before exit)
         await discordService.sendNewEmailNotification(parsed.to, parsed.from)

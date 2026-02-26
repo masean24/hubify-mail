@@ -167,7 +167,7 @@ router.get('/otp/:address', async (req, res) => {
         const emails = await inboxService.getInboxEmails(inbox.id);
 
         const items = emails.map((e) => {
-            const otp = otpExtract.extractOtp(e.body_text, e.body_html);
+            const otp = otpExtract.extractOtp(e.body_text, e.body_html, e.subject);
             return {
                 id: e.id,
                 from: e.from_address,
